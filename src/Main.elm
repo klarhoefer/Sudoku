@@ -1,14 +1,19 @@
 module Main exposing (..)
 
 
+import Array exposing (Array)
 import Browser
+import Browser.Dom as Dom
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Json.Decode as Decode
+import Task
 
 
 type Msg
-    = Noop
+    = CellChanged Int String
+    | CellKey Int String
 
 
 type Cell
@@ -17,8 +22,23 @@ type Cell
 
 
 type alias Model =
-    { field: List Cell
+    { field: Array Cell
     }
+
+
+key : Decode.Decoder String
+key =
+    Decode.field "key" Decode.string
+
+
+alwaysPreventDefault : msg -> ( msg, Bool )
+alwaysPreventDefault msg =
+  ( msg, True )
+
+
+onKeyUp : (String -> msg) -> Attribute msg
+onKeyUp tagger =
+    on "keyup" (Decode.map tagger key)
 
 
 main : Program () Model Msg
@@ -33,28 +53,48 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { field = List.repeat 81 Empty }, Cmd.none )
-
-
-updateField : List Cell -> List Cell
-updateField field =
-    field
-        |> List.map
-            (\cell ->
-                case cell of
-                    Empty ->
-                        Filled 1
-
-                    Filled n ->
-                        Filled (n+1)
-            )
+    ( { field = Array.repeat 81 Empty }, Cmd.none )
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
-        Noop ->
-            ( {model | field = updateField model.field}, Cmd.none )
+        CellChanged n newVal ->
+            let
+                updatedCell =
+                    case String.toInt newVal of
+                        Just v ->
+                            if v >= 1 && v <= 9 then
+                                Filled v
+                            else
+                                Empty
+
+                        Nothing ->
+                            Empty
+
+                updatedField =
+                    Array.set n updatedCell model.field
+            in
+                ( {model | field = updatedField}, Cmd.none )
+
+        CellKey n k ->
+            let
+                target =
+                    case k of
+                        "ArrowUp" ->
+                            if n - 9 < 0 then n else n - 9
+                        "ArrowDown" ->
+                                if n + 9 > 80 then n else n + 9
+                        "ArrowLeft" ->
+                                if modBy n 9 == 0 then n else n - 1
+                        "ArrowRight" ->
+                                if modBy n 9 == 8 then n else n + 1
+                        _ -> n
+            in
+                ( model, if target == n then
+                    Cmd.none
+                    else
+                    Task.attempt (always (CellKey n k)) (Dom.focus ("inp_" ++ String.fromInt target)) )
 
 
 view : Model -> Html Msg
@@ -62,19 +102,23 @@ view model =
     div [ class "sudoku-container" ]
         [ h2 [] [ text "Sudoku" ]
         , div [ class "sudoku-grid" ]
-            (List.map viewCell model.field)
+            (List.indexedMap viewCell (Array.toList model.field))
         ]
 
 
-slice : Int -> Int -> List a -> List a
-slice start end list =
-    list
-        |> List.drop start
-        |> List.take (end - start)
-
-
-viewCell : Cell -> Html Msg
-viewCell cell =
-    div [ class "sudoku-cell" ]
-        [ input [ type_ "text", maxlength 1 ] []
-        ]
+viewCell : Int -> Cell -> Html Msg
+viewCell n cell =
+    let
+        val = case cell of
+            Empty -> ""
+            Filled v -> String.fromInt v
+    in
+        div [ class "sudoku-cell" ]
+            [ input [ type_ "text"
+                    , id ("inp_" ++ (String.fromInt n))
+                    , maxlength 1
+                    , value val
+                    , onInput (CellChanged n)
+                    , onKeyUp (CellKey n)
+                    ] []
+            ]
