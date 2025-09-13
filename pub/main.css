@@ -1,0 +1,83 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+}
+
+.sudoku-container {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.sudoku-grid {
+    display: grid;
+    grid-template-columns: repeat(9, 50px);
+    grid-template-rows: repeat(9, 50px);
+    border: 3px solid #333;
+    background: #333;
+    gap: 1px;
+}
+
+.sudoku-cell {
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.sudoku-cell:hover {
+    background-color: #e3f2fd;
+}
+
+.sudoku-cell input {
+    width: 100%;
+    height: 100%;
+    border: none;
+    outline: none;
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    background: transparent;
+}
+
+/* Dickere Linien für 3x3 Blöcke */
+.sudoku-cell:nth-child(3n):not(:nth-child(9n)) {
+    border-right: 2px solid #333;
+}
+
+.sudoku-cell:nth-child(n+19):nth-child(-n+27),
+.sudoku-cell:nth-child(n+46):nth-child(-n+54) {
+    border-bottom: 2px solid #333;
+}
+
+/* Alternative: CSS Grid mit expliziten Linien */
+.sudoku-grid-alt {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr 1fr 1fr 3px) 1fr 1fr 1fr;
+    grid-template-rows: repeat(3, 1fr 1fr 1fr 3px) 1fr 1fr 1fr;
+    width: 453px;
+    height: 453px;
+    border: 3px solid #333;
+    background: #333;
+    gap: 1px;
+}
+
+.grid-line-vertical {
+    background: #333;
+    grid-row: 1 / -1;
+}
+
+.grid-line-horizontal {
+    background: #333;
+    grid-column: 1 / -1;
+}
