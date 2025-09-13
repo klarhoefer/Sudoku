@@ -17,8 +17,8 @@ emptySudoku =
     Sudoku (Array.repeat 81 Empty)
 
 
-toCellList : Sudoku -> List Cell
-toCellList (Sudoku arr) =
+cells : Sudoku -> List Cell
+cells (Sudoku arr) =
     Array.toList arr
 
 

@@ -26,16 +26,11 @@ type alias Model =
 main : Program () Model Msg
 main =
     Browser.element
-        { init = init
+        { init = \_ -> ( { sudoku = emptySudoku }, Cmd.none )
         , update = update
         , subscriptions = \_ -> Sub.none
         , view = view
         }
-
-
-init : () -> ( Model, Cmd Msg )
-init _ =
-    ( { sudoku = emptySudoku }, Cmd.none )
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -83,7 +78,7 @@ view model =
     div [ class "sudoku-container" ]
         [ h2 [] [ text "Sudoku" ]
         , div [ class "sudoku-grid" ]
-            (List.indexedMap viewCell (toCellList model.sudoku))
+            (List.indexedMap viewCell (cells model.sudoku))
         ]
 
 
