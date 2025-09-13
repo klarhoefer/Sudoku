@@ -32,11 +32,6 @@ key =
     Decode.field "key" Decode.string
 
 
-alwaysPreventDefault : msg -> ( msg, Bool )
-alwaysPreventDefault msg =
-  ( msg, True )
-
-
 onKeyUp : (String -> msg) -> Attribute msg
 onKeyUp tagger =
     on "keyup" (Decode.map tagger key)
@@ -69,38 +64,32 @@ update msg model =
                                 Filled v
                             else
                                 Empty
-
                         Nothing ->
                             Empty
-
-                updatedField =
-                    Array.set n updatedCell model.field
             in
-                ( {model | field = updatedField}, Cmd.none )
+                ( {model | field = Array.set n updatedCell model.field}, Cmd.none )
 
         CellKey n k ->
             let
                 target =
                     case k of
                         "ArrowUp" ->
-                            if n < 9 then n else n - 9
+                            if n < 9 then Nothing else Just (n - 9)
                         "ArrowDown" ->
-                            if n > 71 then n else n + 9
+                            if n > 71 then Nothing else Just (n + 9)
                         "ArrowLeft" ->
-                            if modBy 9 n == 0 then n else n - 1
+                            if modBy 9 n == 0 then Nothing else Just (n - 1)
                         "ArrowRight" ->
-                            if modBy 9 n == 8 then n else n + 1
-                        _ -> n
+                            if modBy 9 n == 8 then Nothing else Just (n + 1)
+                        _ -> Nothing
             in
                 ( model
-                , if target == n then
-                    Cmd.none
-                  else
-                    Task.attempt (\_ -> NoOp) (Dom.focus ("inp_" ++ String.fromInt target))
+                , case target of
+                    Nothing -> Cmd.none
+                    Just t -> Task.attempt (\_ -> NoOp) (Dom.focus ("inp_" ++ String.fromInt t))
                 )
-        
-        NoOp -> 
-            ( model, Cmd.none )
+
+        NoOp -> ( model, Cmd.none )
 
 
 view : Model -> Html Msg
