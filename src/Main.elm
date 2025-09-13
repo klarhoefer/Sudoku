@@ -1,14 +1,15 @@
 module Main exposing (..)
 
 
-import Array exposing (Array)
 import Browser
 import Browser.Dom as Dom
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Json.Decode as Decode
 import Task
+
+import Sudoku exposing (..)
+import Utils exposing (..)
 
 
 type Msg
@@ -17,24 +18,9 @@ type Msg
     | NoOp
 
 
-type Cell
-    = Empty
-    | Filled Int
-
-
 type alias Model =
-    { field: Array Cell
+    { sudoku : Sudoku
     }
-
-
-key : Decode.Decoder String
-key =
-    Decode.field "key" Decode.string
-
-
-onKeyUp : (String -> msg) -> Attribute msg
-onKeyUp tagger =
-    on "keyup" (Decode.map tagger key)
 
 
 main : Program () Model Msg
@@ -49,7 +35,7 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { field = Array.repeat 81 Empty }, Cmd.none )
+    ( { sudoku = emptySudoku }, Cmd.none )
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -67,7 +53,7 @@ update msg model =
                         Nothing ->
                             Empty
             in
-                ( {model | field = Array.set n updatedCell model.field}, Cmd.none )
+                ( {model | sudoku = updateCell model.sudoku n updatedCell}, Cmd.none )
 
         CellKey n k ->
             let
@@ -97,7 +83,7 @@ view model =
     div [ class "sudoku-container" ]
         [ h2 [] [ text "Sudoku" ]
         , div [ class "sudoku-grid" ]
-            (List.indexedMap viewCell (Array.toList model.field))
+            (List.indexedMap viewCell (toCellList model.sudoku))
         ]
 
 

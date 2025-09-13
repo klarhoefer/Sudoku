@@ -16,43 +16,5 @@
             node: document.querySelector('main')
         });
     </script>
-
-    <!-- <script>
-        // Nur Zahlen 1-9 in Eingabefeldern erlauben
-        document.querySelectorAll('.sudoku-cell input').forEach(input => {
-            input.addEventListener('input', function(e) {
-                const value = e.target.value;
-                if (!/^[1-9]$/.test(value)) {
-                    e.target.value = '';
-                }
-            });
-
-            // Navigation mit Pfeiltasten
-            input.addEventListener('keydown', function(e) {
-                const currentIndex = Array.from(document.querySelectorAll('.sudoku-cell input')).indexOf(e.target);
-                let newIndex;
-
-                switch(e.key) {
-                    case 'ArrowRight':
-                        newIndex = currentIndex < 80 ? currentIndex + 1 : currentIndex;
-                        break;
-                    case 'ArrowLeft':
-                        newIndex = currentIndex > 0 ? currentIndex - 1 : currentIndex;
-                        break;
-                    case 'ArrowDown':
-                        newIndex = currentIndex < 72 ? currentIndex + 9 : currentIndex;
-                        break;
-                    case 'ArrowUp':
-                        newIndex = currentIndex > 8 ? currentIndex - 9 : currentIndex;
-                        break;
-                    default:
-                        return;
-                }
-
-                document.querySelectorAll('.sudoku-cell input')[newIndex].focus();
-                e.preventDefault();
-            });
-        });
-    </script> -->
 </body>
 </html>
