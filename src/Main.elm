@@ -14,6 +14,7 @@ import Task
 type Msg
     = CellChanged Int String
     | CellKey Int String
+    | NoOp
 
 
 type Cell
@@ -82,19 +83,24 @@ update msg model =
                 target =
                     case k of
                         "ArrowUp" ->
-                            if n - 9 < 0 then n else n - 9
+                            if n < 9 then n else n - 9
                         "ArrowDown" ->
-                                if n + 9 > 80 then n else n + 9
+                            if n > 71 then n else n + 9
                         "ArrowLeft" ->
-                                if modBy n 9 == 0 then n else n - 1
+                            if modBy 9 n == 0 then n else n - 1
                         "ArrowRight" ->
-                                if modBy n 9 == 8 then n else n + 1
+                            if modBy 9 n == 8 then n else n + 1
                         _ -> n
             in
-                ( model, if target == n then
+                ( model
+                , if target == n then
                     Cmd.none
-                    else
-                    Task.attempt (always (CellKey n k)) (Dom.focus ("inp_" ++ String.fromInt target)) )
+                  else
+                    Task.attempt (\_ -> NoOp) (Dom.focus ("inp_" ++ String.fromInt target))
+                )
+        
+        NoOp -> 
+            ( model, Cmd.none )
 
 
 view : Model -> Html Msg
