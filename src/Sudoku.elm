@@ -25,3 +25,18 @@ cells (Sudoku arr) =
 updateCell : Sudoku -> Int -> Cell -> Sudoku
 updateCell (Sudoku arr) idx newCell =
     Sudoku (Array.set idx newCell arr)
+
+
+rowByIndex : Int -> Int
+rowByIndex idx = idx // 9
+
+colByIndex : Int -> Int
+colByIndex idx = modBy 9 idx
+
+boxByIndex : Int -> Int
+boxByIndex idx =
+    let
+        row = rowByIndex idx
+        col = colByIndex idx
+    in
+        (row // 3) * 3 + (col // 3)
