@@ -83,3 +83,44 @@ uniqueValues lst =
         (\x acc -> if List.member x acc then acc else x :: acc)
         []
         lst
+
+
+solve : Sudoku -> Maybe Sudoku
+solve sudoku =
+    let
+        emptyIndices =
+            Array.toIndexedList (let (Sudoku arr) = sudoku in arr)
+                |> List.filter (\(_, c) -> c == Empty)
+                |> List.map Tuple.first
+
+        tryFill idxs s =
+            case idxs of
+                [] ->
+                    Just s
+
+                i :: is ->
+                    let
+                        takenValues =
+                            inAny s i
+                                |> List.filterMap (\c -> case c of
+                                    Filled v -> Just v
+                                    Empty -> Nothing
+                                )
+
+                        candidates =
+                            List.filter (\v -> not (List.member v takenValues)) (List.range 1 9)
+
+                        attempt l =
+                            case l of
+                                [] -> Nothing
+                                v :: vs ->
+                                    let
+                                        newSudoku = updateCell s i (Filled v)
+                                    in
+                                        case tryFill is newSudoku of
+                                            Just solved -> Just solved
+                                            Nothing -> attempt vs
+                    in
+                        attempt candidates
+    in
+        tryFill emptyIndices sudoku

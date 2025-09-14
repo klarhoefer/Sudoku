@@ -81,3 +81,20 @@ body {
     background: #333;
     grid-column: 1 / -1;
 }
+
+.hdr-btn {
+    display: flex;
+    justify-content: space-between;
+}
+
+.hdr-btn button {
+    margin: 10px 0;
+    padding: 10px 15px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #1976d2;
+    color: white;
+    transition: background-color 0.3s;
+}

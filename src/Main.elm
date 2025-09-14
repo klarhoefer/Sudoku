@@ -16,18 +16,20 @@ type Msg
     = CellChanged Int String
     | CellKey Int String
     | CellFocus Int
+    | Solve
     | NoOp
 
 
 type alias Model =
     { sudoku : Sudoku
+    , taken : List Int
     }
 
 
 main : Program () Model Msg
 main =
     Browser.element
-        { init = \_ -> ( { sudoku = emptySudoku }, Cmd.none )
+        { init = \_ -> ( { sudoku = emptySudoku, taken = [] }, Cmd.none )
         , update = update
         , subscriptions = \_ -> Sub.none
         , view = view
@@ -43,7 +45,10 @@ update msg model =
                     case String.toInt newVal of
                         Just v ->
                             if v >= 1 && v <= 9 then
-                                Filled v
+                                if List.member v model.taken then
+                                    Empty
+                                else
+                                    Filled v
                             else
                                 Empty
                         Nothing ->
@@ -77,9 +82,15 @@ update msg model =
                     |> List.map (\c -> case c of
                         Empty -> 0
                         Filled v -> v)
-                    |> Debug.log "Cells in the same row"
+                    |> Debug.log "Cells taken"
             in
-                ( model, Cmd.none )
+                ( {model| taken = cells}, Cmd.none )
+
+        Solve -> --( model, Task.perform (\_ -> Solve) (Process.sleep 10) )
+            ( {model | sudoku = case solve model.sudoku of
+                Just solved -> solved
+                Nothing -> model.sudoku
+            }, Cmd.none)
 
         NoOp -> ( model, Cmd.none )
 
@@ -87,7 +98,10 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div [ class "sudoku-container" ]
-        [ h2 [] [ text "Sudoku" ]
+        [ div [ class "hdr-btn" ]
+            [ h2 [] [ text "Sudoku" ]
+            , button [ onClick Solve ] [ text "Solve" ]
+            ]
         , div [ class "sudoku-grid" ]
             (List.indexedMap viewCell (cells model.sudoku))
         ]
