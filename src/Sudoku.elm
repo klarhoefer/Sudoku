@@ -74,3 +74,12 @@ inAny sudoku n =
         , inCol sudoku (colByIndex n)
         , inBox sudoku (boxByIndex n)
         ]
+    |> uniqueValues
+
+
+uniqueValues : List a -> List a
+uniqueValues lst =
+    List.foldl
+        (\x acc -> if List.member x acc then acc else x :: acc)
+        []
+        lst
