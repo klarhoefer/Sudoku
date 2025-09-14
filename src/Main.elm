@@ -15,6 +15,7 @@ import Utils exposing (..)
 type Msg
     = CellChanged Int String
     | CellKey Int String
+    | CellFocus Int
     | NoOp
 
 
@@ -70,6 +71,16 @@ update msg model =
                     Just t -> Task.attempt (\_ -> NoOp) (Dom.focus ("inp_" ++ String.fromInt t))
                 )
 
+        CellFocus n ->
+            let
+                cells = inAny model.sudoku n
+                    |> List.map (\c -> case c of
+                        Empty -> 0
+                        Filled v -> v)
+                    |> Debug.log "Cells in the same row"
+            in
+                ( model, Cmd.none )
+
         NoOp -> ( model, Cmd.none )
 
 
@@ -96,5 +107,6 @@ viewCell n cell =
                     , value val
                     , onInput (CellChanged n)
                     , onKeyUp (CellKey n)
+                    , onFocus (CellFocus n)
                     ] []
             ]

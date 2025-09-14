@@ -30,8 +30,10 @@ updateCell (Sudoku arr) idx newCell =
 rowByIndex : Int -> Int
 rowByIndex idx = idx // 9
 
+
 colByIndex : Int -> Int
 colByIndex idx = modBy 9 idx
+
 
 boxByIndex : Int -> Int
 boxByIndex idx =
@@ -40,3 +42,35 @@ boxByIndex idx =
         col = colByIndex idx
     in
         (row // 3) * 3 + (col // 3)
+
+
+inRow : Sudoku -> Int -> List Cell
+inRow (Sudoku arr) =
+    inSome (Sudoku arr) rowByIndex
+
+
+inCol : Sudoku -> Int -> List Cell
+inCol (Sudoku arr) =
+    inSome (Sudoku arr) colByIndex
+
+
+inBox : Sudoku -> Int -> List Cell
+inBox (Sudoku arr) =
+    inSome (Sudoku arr) boxByIndex
+
+
+inSome : Sudoku -> (Int -> Int) -> Int -> List Cell
+inSome (Sudoku arr) f n =
+    Array.toIndexedList arr
+    |> List.filter (\(i, _) -> f i == n)
+    |> List.map Tuple.second
+    |> List.filter (\c -> c /= Empty)
+
+
+inAny : Sudoku -> Int -> List Cell
+inAny sudoku n =
+    List.concat
+        [ inRow sudoku (rowByIndex n)
+        , inCol sudoku (colByIndex n)
+        , inBox sudoku (boxByIndex n)
+        ]
