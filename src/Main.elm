@@ -23,13 +23,14 @@ type Msg
 type alias Model =
     { sudoku : Sudoku
     , taken : List Int
+    , preset : List Int
     }
 
 
 main : Program () Model Msg
 main =
     Browser.element
-        { init = \_ -> ( { sudoku = emptySudoku, taken = [] }, Cmd.none )
+        { init = \_ -> ( { sudoku = emptySudoku, taken = [], preset = [] }, Cmd.none )
         , update = update
         , subscriptions = \_ -> Sub.none
         , view = view
@@ -88,8 +89,9 @@ update msg model =
 
         Solve -> --( model, Task.perform (\_ -> Solve) (Process.sleep 10) )
             ( {model | sudoku = case solve model.sudoku of
-                Just solved -> solved
-                Nothing -> model.sudoku
+                                    Just solved -> solved
+                                    Nothing -> model.sudoku
+                     , preset = preset model.sudoku
             }, Cmd.none)
 
         NoOp -> ( model, Cmd.none )
@@ -103,18 +105,21 @@ view model =
             , button [ onClick Solve ] [ text "Solve" ]
             ]
         , div [ class "sudoku-grid" ]
-            (List.indexedMap viewCell (cells model.sudoku))
+            (List.indexedMap (viewCell model.preset) (cells model.sudoku))
         ]
 
 
-viewCell : Int -> Cell -> Html Msg
-viewCell n cell =
+viewCell : List Int -> Int -> Cell -> Html Msg
+viewCell preset n cell =
     let
         val = case cell of
             Empty -> ""
             Filled v -> String.fromInt v
     in
-        div [ class "sudoku-cell" ]
+        div [ class "sudoku-cell", classList
+                [ ( "preset", List.member n preset )
+                ]
+            ]
             [ input [ type_ "text"
                     , id ("inp_" ++ (String.fromInt n))
                     , maxlength 1

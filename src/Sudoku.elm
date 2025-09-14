@@ -12,6 +12,15 @@ type Cell
 type Sudoku = Sudoku (Array Cell)
 
 
+preset : Sudoku -> List Int
+preset (Sudoku arr) =
+    Array.toIndexedList arr
+        |> List.filterMap (\(i, c) -> case c of
+            Filled _ -> Just i
+            Empty -> Nothing
+        )
+
+
 emptySudoku : Sudoku
 emptySudoku =
     Sudoku (Array.repeat 81 Empty)
