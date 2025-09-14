@@ -83,7 +83,7 @@ update msg model =
                     |> List.map (\c -> case c of
                         Empty -> 0
                         Filled v -> v)
-                    |> Debug.log "Cells taken"
+                    -- |> Debug.log "Cells taken"
             in
                 ( {model| taken = cells}, Cmd.none )
 
