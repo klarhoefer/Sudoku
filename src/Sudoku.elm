@@ -26,6 +26,11 @@ emptySudoku =
     Sudoku (Array.repeat 81 Empty)
 
 
+keep : Sudoku -> List Int -> Sudoku
+keep (Sudoku arr) lst =
+    Sudoku (Array.indexedMap (\i c -> if List.member i lst then c else Empty) arr)
+
+
 cells : Sudoku -> List Cell
 cells (Sudoku arr) =
     Array.toList arr

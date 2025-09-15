@@ -17,6 +17,7 @@ type Msg
     | CellKey Int String
     | CellFocus Int
     | Solve
+    | Clear
     | NoOp
 
 
@@ -24,13 +25,14 @@ type alias Model =
     { sudoku : Sudoku
     , taken : List Int
     , preset : List Int
+    , solvable: Bool
     }
 
 
 main : Program () Model Msg
 main =
     Browser.element
-        { init = \_ -> ( { sudoku = emptySudoku, taken = [], preset = [] }, Cmd.none )
+        { init = \_ -> ( { sudoku = emptySudoku, taken = [], preset = [], solvable = True }, Cmd.none )
         , update = update
         , subscriptions = \_ -> Sub.none
         , view = view
@@ -88,11 +90,14 @@ update msg model =
                 ( {model| taken = cells}, Cmd.none )
 
         Solve -> --( model, Task.perform (\_ -> Solve) (Process.sleep 10) )
-            ( {model | sudoku = case solve model.sudoku of
-                                    Just solved -> solved
-                                    Nothing -> model.sudoku
-                     , preset = preset model.sudoku
-            }, Cmd.none)
+            ( case solve model.sudoku of
+                Just solved -> {model | sudoku = solved
+                                      , preset = preset model.sudoku
+                                      , solvable = True}
+                Nothing -> {model | solvable = False}
+            , Cmd.none )
+
+        Clear -> ( {model | sudoku = keep model.sudoku model.preset}, Cmd.none )
 
         NoOp -> ( model, Cmd.none )
 
@@ -102,7 +107,16 @@ view model =
     div [ class "sudoku-container" ]
         [ div [ class "hdr-btn" ]
             [ h2 [] [ text "Sudoku" ]
-            , button [ onClick Solve ] [ text "Solve" ]
+            , ( if model.solvable then
+                    span [] []
+                else
+                    img [ src "not_solvable.svg", width 140 ] []
+              )
+            , div []
+                [ button [ onClick Solve ] [ text "Solve" ]
+                , span [ style "width" "4px", style "display" "inline-block" ] []
+                , button [ onClick Clear ] [ text "Clear" ]
+                ]
             ]
         , div [ class "sudoku-grid" ]
             (List.indexedMap (viewCell model.preset) (cells model.sudoku))
